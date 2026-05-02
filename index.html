@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USSC Finance Forum</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+    <!-- 0. Loading Screen -->
+    <div id="loading-screen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="text-gray-500 font-medium flex items-center gap-2">
+            <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 
+            Loading...
+        </div>
+    </div>
+
+    <!-- 1. Authentication Screen -->
+    <div id="auth-screen" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white rounded shadow border border-[#dee0e1] p-8">
+            <h2 class="text-4xl font-bold text-center mb-2 text-blue-800 font-serif tracking-tight">USSC Finance</h2>
+            <h3 id="auth-title" class="text-xl font-medium text-center mb-6 text-gray-600">Sign In to your account</h3>
+            <div id="auth-error" class="text-red-500 text-sm mb-4 text-center hidden"></div>
+            <form id="auth-form" class="space-y-4">
+                <input type="text" id="name" placeholder="Full Name" class="w-full p-3 rounded bg-gray-100 focus:outline-blue-500 hidden" />
+                <input type="email" id="email" placeholder="Work Email" required class="w-full p-3 rounded bg-gray-100 focus:outline-blue-500" />
+                <input type="password" id="password" placeholder="Password" required class="w-full p-3 rounded bg-gray-100 focus:outline-blue-500" />
+                <button type="submit" id="auth-btn" class="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 font-semibold">
+                    Sign In
+                </button>
+            </form>
+            <p class="mt-4 text-center text-sm text-gray-500">
+                <span id="auth-toggle-text">Don't have an account?</span> 
+                <button type="button" id="auth-toggle-btn" class="text-blue-600 hover:underline font-semibold ml-1">Sign Up</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- 2. Main Application Screen -->
+    <div id="app-screen" class="hidden min-h-screen">
+        <!-- Navbar -->
+        <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex items-center justify-center shadow-sm">
+            <div class="max-w-7xl w-full flex items-center justify-between">
+                <div class="flex items-center">
+                    <h1 id="nav-brand" class="text-2xl font-bold text-blue-700 font-serif tracking-tight cursor-pointer hover:opacity-80 transition-opacity">USSC Finance</h1>
+                </div>
+                <div class="flex items-center gap-1 sm:gap-2">
+                    <button id="nav-home" class="flex items-center gap-1.5 px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded transition-colors font-medium text-sm" title="Home">
+                        <svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9v12h5v-7h6v7h5V9z"/></svg>
+                        <span>Home</span>
+                    </button>
+                    <button id="nav-post" class="flex items-center gap-1.5 px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded transition-colors font-medium text-sm" title="Make Post">
+                        <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                        <span>Make A Post</span>
+                    </button>
+                    <button id="nav-profile" class="flex items-center gap-2 px-3 py-1.5 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded-full transition-colors font-medium text-sm border border-transparent hover:border-gray-200" title="Profile">
+                        <svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        <span id="user-display" class="inline-block max-w-[80px] sm:max-w-[120px] truncate"></span>
+                    </button>
+                    <button id="nav-admin" class="hidden flex items-center gap-2 px-3 py-1.5 text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-full transition-colors font-medium text-sm border border-transparent" title="Admin">
+                        <svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+                        <span>Admin</span>
+                    </button>
+                    <button id="logout-btn" class="text-sm px-4 py-1.5 border border-gray-300 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-800 font-medium transition-colors">Logout</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Feed View -->
+        <div id="feed-view" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div>
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Forum Discussion</h2>
+                    <p class="text-sm text-slate-500 mt-1.5">Explore all topics, share insights, and connect with peers.</p>
+                </div>
+                <button id="btn-goto-post" class="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md shadow-blue-500/30 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 text-sm whitespace-nowrap">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Start New Discussion
+                </button>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md border border-slate-200 p-5 mb-8 relative overflow-hidden flex flex-col sm:flex-row justify-between items-center gap-4">
+                <!-- Decorative accent line -->
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
+                <div class="flex flex-col sm:flex-row items-center gap-4 w-full mt-1">
+                    <span class="text-xs font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                        Filters
+                    </span>
+                    <select id="feed-category-filter" class="w-full sm:w-auto px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-blue-600 text-slate-800 font-bold text-sm transition-all cursor-pointer outline-none hover:border-blue-500 hover:shadow">
+                        <option value="All">All Categories</option>
+                        <option value="Delegation of Power">Delegation of Power</option>
+                        <option value="DSR">DSR</option>
+                        <option value="Estimate Vetting">Estimate Vetting</option>
+                        <option value="Budget Certification">Budget Certification</option>
+                        <option value="GCC Clause">GCC Clause</option>
+                        <option value="Tender Document Vetting">Tender Document Vetting</option>
+                        <option value="TCR">TCR</option>
+                        <option value="DPO Vetting">DPO Vetting</option>
+                        <option value="Deposit Work">Deposit Work</option>
+                        <option value="CSR Cases">CSR Cases</option>
+                        <option value="Girls Empowerment">Girls Empowerment</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <select id="feed-date-filter" class="w-full sm:w-auto px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-blue-600 text-slate-800 font-bold text-sm transition-all cursor-pointer outline-none hover:border-blue-500 hover:shadow">
+                        <option value="all">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                    </select>
+                    <select id="feed-user-filter" class="w-full sm:w-auto px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-blue-600 text-slate-800 font-bold text-sm transition-all cursor-pointer outline-none hover:border-blue-500 hover:shadow">
+                        <option value="">All Users</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="posts-container" class="space-y-4">
+                <div class="text-center py-12 text-gray-400 font-medium">Loading posts...</div>
+            </div>
+        </div>
+
+        <!-- Post Detail View -->
+        <div id="post-detail-view" class="hidden max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+            <button id="back-to-feed-btn" class="text-sm text-blue-600 hover:underline font-medium">&larr; Back to Feed</button>
+            <div id="single-post-content" class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-gray-200">
+                <!-- Post content dynamically injected -->
+            </div>
+            <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-gray-200">
+                <h3 class="font-bold text-lg mb-4 text-gray-900">Comments</h3>
+                <form id="add-comment-form" class="mb-6 space-y-3">
+                    <textarea id="comment-text" required placeholder="What are your thoughts?" class="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[100px] text-sm outline-none transition-shadow bg-gray-50 hover:bg-white"></textarea>
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 w-full sm:w-auto overflow-hidden">
+                            <input type="file" id="comment-files" multiple accept="image/*,.pdf,.doc,.docx" class="text-sm text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer" />
+                            <label class="cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-700 p-2.5 rounded-full flex items-center justify-center transition-colors shadow-sm flex-shrink-0" title="Take Photo">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <input type="file" id="comment-camera" accept="image/*" capture="environment" class="hidden" />
+                            </label>
+                        </div>
+                        <button type="submit" id="submit-comment-btn" class="w-full sm:w-auto px-6 py-2.5 bg-blue-600 text-white rounded-lg font-semibold shadow-sm hover:bg-blue-700 transition-all text-sm">Post Comment</button>
+                    </div>
+                    <div id="comment-camera-name" class="text-xs text-green-600 hidden font-medium"></div>
+                    <div id="comment-upload-progress" class="hidden text-xs text-blue-600">Uploading files...</div>
+                    <div id="comment-success-msg" class="hidden mt-3 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center gap-2 text-sm font-medium shadow-sm transition-opacity duration-300">
+                        <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Comment posted successfully!
+                    </div>
+                </form>
+                <div id="comments-container" class="space-y-3 mb-4 text-sm text-gray-600">
+                    <div class="text-center text-gray-400 py-8">Loading comments...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile View -->
+        <div id="profile-view" class="hidden max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+            <button id="profile-back-btn" class="text-sm text-blue-600 hover:underline font-medium">&larr; Back to Home</button>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex items-center gap-6">
+                <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl font-bold" id="profile-avatar">?</div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900" id="profile-email-display"></h2>
+                    <p class="text-gray-500">Forum Member</p>
+                </div>
+            </div>
+            <h3 class="font-bold text-xl text-gray-800">My Posts</h3>
+            <div id="profile-posts-container" class="space-y-4">
+                <!-- User posts dynamically injected -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Application Logic -->
+    <script type="module">
+        // Import Firebase from CDN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy, addDoc, serverTimestamp, doc, updateDoc, deleteDoc, getDoc, getDocs, where, increment, arrayUnion, arrayRemove, deleteField, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+
+        // REPLACE THIS WITH YOUR ACTUAL FIREBASE CONFIG
+        const firebaseConfig = {
+  apiKey: "AIzaSyB49W61ggHHJcAJ5WyYTmX13I8NofsggSY",
+  authDomain: "olympiad-portal-d2a5e.firebaseapp.com",
+  projectId: "olympiad-portal-d2a5e",
+  storageBucket: "olympiad-portal-d2a5e.firebasestorage.app",
+  messagingSenderId: "341855557503",
+  appId: "1:341855557503:web:86333350b609138cb0ec4a"
+};
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // DOM Elements
+        const loadingScreen = document.getElementById('loading-screen');
+        const authScreen = document.getElementById('auth-screen');
+        const appScreen = document.getElementById('app-screen');
+        const authForm = document.getElementById('auth-form');
+        const nameInput = document.getElementById('name');
+        const authTitle = document.getElementById('auth-title');
+        const authBtn = document.getElementById('auth-btn');
+        const authToggleText = document.getElementById('auth-toggle-text');
+        const authToggleBtn = document.getElementById('auth-toggle-btn');
+        const authError = document.getElementById('auth-error');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userDisplay = document.getElementById('user-display');
+        const btnGotoPost = document.getElementById('btn-goto-post');
+        const categoryFilter = document.getElementById('feed-category-filter');
+        const dateFilter = document.getElementById('feed-date-filter');
+        const userFilter = document.getElementById('feed-user-filter');
+        const postsContainer = document.getElementById('posts-container');
+        const feedView = document.getElementById('feed-view');
+        const postDetailView = document.getElementById('post-detail-view');
+        const profileView = document.getElementById('profile-view');
+        const navHome = document.getElementById('nav-home');
+        const navPost = document.getElementById('nav-post');
+        const navBrand = document.getElementById('nav-brand');
+        const navProfile = document.getElementById('nav-profile');
+        const navAdmin = document.getElementById('nav-admin');
+        const backToFeedBtn = document.getElementById('back-to-feed-btn');
+        const profileBackBtn = document.getElementById('profile-back-btn');
+        const singlePostContent = document.getElementById('single-post-content');
+        const addCommentForm = document.getElementById('add-comment-form');
+        const commentsContainer = document.getElementById('comments-container');
+        const commentCameraInput = document.getElementById('comment-camera');
+        const commentCameraName = document.getElementById('comment-camera-name');
+        const commentUploadProgress = document.getElementById('comment-upload-progress');
+        const commentSuccessMsg = document.getElementById('comment-success-msg');
+        const profilePostsContainer = document.getElementById('profile-posts-container');
+
+        // State
+        let currentUser = null;
+        let postsUnsubscribe = null;
+        let commentsUnsubscribe = null;
+        let currentPostId = null;
+        let isLoginMode = true;
+
+        // --- AUTHENTICATION LOGIC ---
+        onAuthStateChanged(auth, async (user) => {
+            loadingScreen.classList.add('hidden');
+            if (user) {
+                // Check or Create User Doc for Admin panel indexing
+                const userDocRef = doc(db, 'forum_users', user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+                
+                if (userDocSnap.exists()) {
+                    const data = userDocSnap.data();
+                    if (data.isDisabled || data.isDeleted) {
+                        alert("Your account has been disabled or deleted by an Administrator.");
+                        await signOut(auth);
+                        return;
+                    }
+                    if (data.isAdmin || user.email === 'madhhu52@gmail.com') navAdmin.classList.remove('hidden');
+                } else {
+                    const isSuperAdmin = user.email === 'madhhu52@gmail.com';
+                    await setDoc(userDocRef, {
+                        email: user.email,
+                        name: user.displayName || user.email.split('@')[0],
+                        isAdmin: isSuperAdmin, isDisabled: false, isDeleted: false
+                    });
+                    if (isSuperAdmin) navAdmin.classList.remove('hidden');
+                }
+
+                currentUser = user;
+                authScreen.classList.add('hidden');
+                appScreen.classList.remove('hidden');
+                userDisplay.innerText = user.displayName || user.email;
+                loadPosts();
+            } else {
+                currentUser = null;
+                authScreen.classList.remove('hidden');
+                appScreen.classList.add('hidden');
+                navAdmin.classList.add('hidden');
+                if (postsUnsubscribe) postsUnsubscribe();
+            }
+        });
+
+        authToggleBtn.addEventListener('click', () => {
+            isLoginMode = !isLoginMode;
+            authTitle.innerText = isLoginMode ? 'Sign In to your account' : 'Create a new account';
+            authBtn.innerText = isLoginMode ? 'Sign In' : 'Sign Up';
+            authToggleText.innerText = isLoginMode ? "Don't have an account?" : "Already have an account?";
+            authToggleBtn.innerText = isLoginMode ? 'Sign Up' : 'Sign In';
+            authError.classList.add('hidden');
+            
+            if (isLoginMode) {
+                nameInput.classList.add('hidden');
+                nameInput.removeAttribute('required');
+            } else {
+                nameInput.classList.remove('hidden');
+                nameInput.setAttribute('required', 'true');
+            }
+        });
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const name = document.getElementById('name').value;
+            authError.classList.add('hidden');
+            authBtn.disabled = true;
+            
+            try {
+                if (isLoginMode) {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } else {
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    await updateProfile(userCredential.user, {
+                        displayName: name
+                    });
+                    await setDoc(doc(db, 'forum_users', userCredential.user.uid), {
+                        email: email,
+                        name: name,
+                        isAdmin: email === 'madhhu52@gmail.com',
+                        isDisabled: false,
+                        isDeleted: false
+                    });
+                    currentUser = auth.currentUser;
+                    userDisplay.innerText = currentUser.displayName || currentUser.email;
+                }
+            } catch (error) {
+                authError.innerText = error.message;
+                authError.classList.remove('hidden');
+            }
+            authBtn.disabled = false;
+        });
+
+        logoutBtn.addEventListener('click', () => signOut(auth));
+
+        // --- VIEW ROUTING ---
+        function switchView(view) {
+            feedView.classList.add('hidden');
+            postDetailView.classList.add('hidden');
+            profileView.classList.add('hidden');
+            
+            if (view === 'feed') feedView.classList.remove('hidden');
+            else if (view === 'post') postDetailView.classList.remove('hidden');
+            else if (view === 'profile') profileView.classList.remove('hidden');
+        }
+
+        navHome.addEventListener('click', () => switchView('feed'));
+        navPost.addEventListener('click', () => window.location.href = 'post.html');
+        btnGotoPost.addEventListener('click', () => window.location.href = 'post.html');
+        navBrand.addEventListener('click', () => switchView('feed'));
+        backToFeedBtn.addEventListener('click', () => switchView('feed'));
+        profileBackBtn.addEventListener('click', () => switchView('feed'));
+        navProfile.addEventListener('click', () => {
+            switchView('profile');
+            loadProfile();
+        });
+        
+        // Route admin button click to dedicated page
+        navAdmin.addEventListener('click', () => window.location.href = 'admin.html');
+
+        // --- POSTS LOGIC ---
+        async function handleFileUploads(filesArray) {
+            const urls = [];
+            for (let i = 0; i < filesArray.length; i++) {
+                const file = filesArray[i];
+                const fileRef = ref(storage, `forum_files/${Date.now()}_${file.name}`);
+                await uploadBytes(fileRef, file);
+                const url = await getDownloadURL(fileRef);
+                urls.push({ name: file.name, url: url });
+            }
+            return urls;
+        }
+
+        function loadPosts() {
+            let q;
+            const selectedCategory = categoryFilter.value;
+            const selectedDate = dateFilter.value;
+            const selectedUser = userFilter.value.trim().toLowerCase();
+            
+            if (selectedCategory === 'All') {
+                q = query(collection(db, 'forum_posts'), orderBy('createdAt', 'desc'));
+            } else {
+                q = query(collection(db, 'forum_posts'), where('category', '==', selectedCategory), orderBy('createdAt', 'desc'));
+            }
+            
+            postsUnsubscribe = onSnapshot(q, async (snapshot) => {
+                postsContainer.innerHTML = '';
+                
+                // Populate user dropdown dynamically with unique users from the current feed
+                const currentSelectedUser = userFilter.value;
+                const uniqueUsers = new Set();
+                snapshot.docs.forEach(docSnap => {
+                    const uName = docSnap.data().userName;
+                    if (uName) uniqueUsers.add(uName);
+                });
+                userFilter.innerHTML = '<option value="">All Users</option>';
+                Array.from(uniqueUsers).sort().forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.toLowerCase();
+                    option.textContent = user;
+                    if (user.toLowerCase() === currentSelectedUser) option.selected = true;
+                    userFilter.appendChild(option);
+                });
+
+                let postsData = snapshot.docs.map(docSnap => ({ docSnap, data: docSnap.data() }));
+
+                // Filter by date locally to avoid Firestore composite index requirements
+                if (selectedDate && selectedDate !== 'all') {
+                    let limitDate = new Date();
+                    
+                    if (selectedDate === 'today') {
+                        limitDate.setHours(0, 0, 0, 0);
+                    } else if (selectedDate === 'week') {
+                        limitDate.setDate(limitDate.getDate() - 7);
+                    } else if (selectedDate === 'month') {
+                        limitDate.setMonth(limitDate.getMonth() - 1);
+                    }
+                    
+                    postsData = postsData.filter(p => {
+                        if (!p.data.createdAt) return false;
+                        const postDate = p.data.createdAt.toMillis();
+                        return postDate >= limitDate.getTime();
+                    });
+                }
+
+                // Filter by user name locally
+                if (selectedUser) {
+                    postsData = postsData.filter(p => {
+                        const authorName = (p.data.userName || '').toLowerCase();
+                        return authorName === selectedUser;
+                    });
+                }
+
+                if (postsData.length === 0) {
+                    postsContainer.innerHTML = '<div class="text-center py-12 text-slate-500 bg-white border border-slate-200 rounded-xl shadow-sm">No posts found matching your filters.</div>';
+                    return;
+                }
+
+                const postPromises = postsData.map(async ({docSnap, data: post}) => {
+                    const postId = docSnap.id;
+                    
+                    const isOwner = currentUser.uid === post.userId;
+                    const likesCount = post.likes || 0;
+                    const dislikesCount = post.dislikes || 0;
+                    
+                    let hasLiked = false;
+                    let hasDisliked = false;
+                    let commentCount = 0;
+                    let likedNames = '';
+                    let dislikedNames = '';
+
+                    try {
+                        const qLike = query(collection(db, 'forum_likes'), where('postId', '==', postId));
+                        const likeSnap = await getDocs(qLike);
+                        const likedNamesArr = [];
+                        likeSnap.forEach(d => {
+                            if (d.data().userId === currentUser.uid) hasLiked = true;
+                            if (d.data().userName) likedNamesArr.push(d.data().userName);
+                        });
+                        likedNames = likedNamesArr.join(', ');
+                        
+                        const qDislike = query(collection(db, 'forum_dislikes'), where('postId', '==', postId));
+                        const dislikeSnap = await getDocs(qDislike);
+                        const dislikedNamesArr = [];
+                        dislikeSnap.forEach(d => {
+                            if (d.data().userId === currentUser.uid) hasDisliked = true;
+                            if (d.data().userName) dislikedNamesArr.push(d.data().userName);
+                        });
+                        dislikedNames = dislikedNamesArr.join(', ');
+
+                        const commentsQ = query(collection(db, 'forum_comments'), where('postId', '==', postId));
+                        const commentsSnap = await getDocs(commentsQ);
+                        commentCount = commentsSnap.size;
+                    } catch (error) {
+                        console.warn("Could not fetch reactions/comments for post", postId, error);
+                    }
+                    
+                    // Format date
+                    const dateStr = post.createdAt ? new Date(post.createdAt.toMillis()).toLocaleDateString() : 'Just now';
+
+                    const authorInitial = post.userName ? post.userName.charAt(0).toUpperCase() : '?';
+                    const authorName = post.userName || 'Unknown';
+                    
+                    return { post, postId, isOwner, likesCount, dislikesCount, hasLiked, hasDisliked, commentCount, dateStr, authorInitial, authorName, likedNames, dislikedNames };
+                });
+                
+                const resolvedPosts = await Promise.all(postPromises);
+
+                resolvedPosts.forEach(({ post, postId, isOwner, likesCount, dislikesCount, hasLiked, hasDisliked, commentCount, dateStr, authorInitial, authorName, likedNames, dislikedNames }) => {
+                    const postCard = document.createElement('div');
+                    postCard.className = "bg-white p-5 sm:p-6 rounded-xl shadow-sm border border-slate-200 mb-5 hover:shadow-lg hover:border-blue-200 transition-all duration-200";
+                    
+                    let filesHtml = '';
+                    let imagesHtml = '';
+                    if (post.fileUrls && post.fileUrls.length > 0) {
+                        let hasFiles = false;
+                        let hasImages = false;
+                        filesHtml = `<div class="mt-3 flex flex-wrap gap-2">`;
+                        imagesHtml = `<div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">`;
+                        
+                        post.fileUrls.forEach(f => {
+                            const ext = f.name.split('.').pop().toLowerCase();
+                            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                                imagesHtml += `<img src="${f.url}" alt="${f.name}" class="rounded-lg object-cover w-full h-48 sm:h-64 border border-slate-200 shadow-sm cursor-pointer hover:opacity-90 transition-opacity" onclick="window.open('${f.url}', '_blank')" />`;
+                                hasImages = true;
+                            } else {
+                                filesHtml += `<a href="${f.url}" target="_blank" class="text-xs bg-gray-50 text-blue-600 px-3 py-1.5 rounded-full border border-gray-200 hover:bg-blue-50 hover:border-blue-200 transition-colors font-medium flex items-center gap-1.5">📎 ${f.name}</a>`;
+                                hasFiles = true;
+                            }
+                        });
+                        filesHtml += `</div>`;
+                        imagesHtml += `</div>`;
+                        if (!hasFiles) filesHtml = '';
+                        if (!hasImages) imagesHtml = '';
+                    }
+
+                    postCard.innerHTML = `
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm border border-blue-100">${authorInitial}</div>
+                                <div>
+                                    <h4 class="font-bold text-[15px] text-slate-900 hover:text-blue-600 cursor-pointer transition-colors">${authorName}</h4>
+                                    <p class="text-xs text-slate-500 mt-0.5 font-medium">${dateStr} <span class="mx-1">•</span> <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">${post.category}</span></p>
+                                </div>
+                            </div>
+                            ${isOwner ? `<button data-id="${postId}" class="delete-btn text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg p-1.5 transition-colors" title="Delete Post"><svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : ''}
+                        </div>
+                        <h2 data-id="${postId}" class="post-title text-xl font-bold mb-2 cursor-pointer hover:text-blue-600 text-slate-900 leading-snug transition-colors">
+                            <span class="text-blue-600 mr-1">#${post.slNo || '-'}</span>${post.title}
+                        </h2>
+                        <p class="text-slate-600 text-[15px] mb-4 whitespace-pre-wrap leading-relaxed line-clamp-3">${post.content}</p>
+                        ${imagesHtml}
+                        ${filesHtml}
+                        <div class="flex items-center gap-2 sm:gap-3 pt-3 mt-1 border-t border-gray-100">
+                            <button data-id="${postId}" title="${likedNames}" data-liked="${hasLiked}" class="post-like-btn flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${hasLiked ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-green-600'}">
+                                <svg class="w-4 h-4 pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.56l2.5-8.76A2 2 0 0 0 21 11H14z" /><path d="M2 9h4v12H2z" /></svg>
+                                <span class="pointer-events-none">${likesCount}</span>
+                            </button>
+                            <button data-id="${postId}" title="${dislikedNames}" data-disliked="${hasDisliked}" class="post-dislike-btn flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${hasDisliked ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-red-600'}">
+                                <svg class="w-4 h-4 pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.56l-2.5 8.76A2 2 0 0 0 3 13h7z" /><path d="M22 15h-4V3h4z" /></svg>
+                                <span class="pointer-events-none">${dislikesCount}</span>
+                            </button>
+                            <button data-id="${postId}" class="post-title flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-blue-600 ml-auto sm:ml-0">
+                                💬 ${commentCount} Comments
+                            </button>
+                        </div>
+                    `;
+                    
+                    postsContainer.appendChild(postCard);
+                });
+
+                // Attach event listeners to dynamic buttons
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        if (confirm('Delete this post?')) {
+                            const id = e.target.getAttribute('data-id');
+                            await deleteDoc(doc(db, 'forum_posts', id));
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.post-like-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        try {
+                            const id = e.currentTarget.getAttribute('data-id');
+                            const hasLiked = e.currentTarget.getAttribute('data-liked') === 'true';
+                            const btnDislike = document.querySelector(`.post-dislike-btn[data-id="${id}"]`);
+                            const hasDisliked = btnDislike ? btnDislike.getAttribute('data-disliked') === 'true' : false;
+                            
+                            if (hasLiked || hasDisliked) {
+                                alert("You can only react once per post.");
+                                return;
+                            }
+                            
+                            const postRef = doc(db, 'forum_posts', id);
+
+                            // Verify the post has not been closed by an admin
+                            const pDoc = await getDoc(postRef);
+                            if (pDoc.exists() && pDoc.data().isClosed) {
+                                alert("This discussion is closed. Reactions are disabled.");
+                                return;
+                            }
+                            
+                            await addDoc(collection(db, 'forum_likes'), { 
+                                postId: id, 
+                                userId: currentUser.uid,
+                                userName: currentUser.displayName || currentUser.email.split('@')[0]
+                            });
+                            await updateDoc(postRef, { likes: increment(1) });
+                        } catch (error) {
+                            console.error("Like Error:", error);
+                            alert("Could not update Like. Please check Firestore Rules.");
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.post-dislike-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        try {
+                            const id = e.currentTarget.getAttribute('data-id');
+                            const hasDisliked = e.currentTarget.getAttribute('data-disliked') === 'true';
+                            const btnLike = document.querySelector(`.post-like-btn[data-id="${id}"]`);
+                            const hasLiked = btnLike ? btnLike.getAttribute('data-liked') === 'true' : false;
+                            
+                            if (hasLiked || hasDisliked) {
+                                alert("You can only react once per post.");
+                                return;
+                            }
+                            
+                            const postRef = doc(db, 'forum_posts', id);
+
+                            // Verify the post has not been closed by an admin
+                            const pDoc = await getDoc(postRef);
+                            if (pDoc.exists() && pDoc.data().isClosed) {
+                                alert("This discussion is closed. Reactions are disabled.");
+                                return;
+                            }
+                            
+                            await addDoc(collection(db, 'forum_dislikes'), { 
+                                postId: id, 
+                                userId: currentUser.uid,
+                                userName: currentUser.displayName || currentUser.email.split('@')[0]
+                            });
+                            await updateDoc(postRef, { dislikes: increment(1) });
+                        } catch (error) {
+                            console.error("Dislike Error:", error);
+                            alert("Could not update Dislike. Please check Firestore Rules.");
+                        }
+                    });
+                });
+
+            document.querySelectorAll('.post-title').forEach(title => {
+                title.addEventListener('click', async (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    await loadSinglePost(id);
+                    switchView('post');
+                });
+            });
+            });
+        }
+
+        categoryFilter.addEventListener('change', () => {
+            if (postsUnsubscribe) postsUnsubscribe();
+            loadPosts();
+        });
+
+        dateFilter.addEventListener('change', () => {
+            if (postsUnsubscribe) postsUnsubscribe();
+            loadPosts();
+        });
+
+        userFilter.addEventListener('change', () => {
+            if (postsUnsubscribe) postsUnsubscribe();
+            loadPosts();
+        });
+
+        async function loadSinglePost(id) {
+            currentPostId = id;
+            singlePostContent.innerHTML = '<div class="text-center text-gray-500 py-10">Loading post...</div>';
+            try {
+                const docRef = doc(db, 'forum_posts', id);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const post = docSnap.data();
+                    const dateStr = post.createdAt ? new Date(post.createdAt.toMillis()).toLocaleDateString() : 'Just now';
+                    
+                    const authorInitial = post.userName ? post.userName.charAt(0).toUpperCase() : '?';
+                    const authorName = post.userName || 'Unknown';
+
+                    let filesHtml = '';
+                    let imagesHtml = '';
+                    if (post.fileUrls && post.fileUrls.length > 0) {
+                        let hasFiles = false;
+                        let hasImages = false;
+                        filesHtml = `<div class="mt-5 flex flex-wrap gap-2">`;
+                        imagesHtml = `<div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">`;
+                        
+                        post.fileUrls.forEach(f => {
+                            const ext = f.name.split('.').pop().toLowerCase();
+                            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                                imagesHtml += `<img src="${f.url}" alt="${f.name}" class="rounded-xl object-cover w-full max-h-96 border border-gray-200 shadow-sm cursor-pointer hover:opacity-90 transition-opacity" onclick="window.open('${f.url}', '_blank')" />`;
+                                hasImages = true;
+                            } else {
+                                filesHtml += `<a href="${f.url}" target="_blank" class="text-sm bg-blue-50 text-blue-700 px-4 py-2 rounded-full border border-blue-100 hover:bg-blue-100 transition-colors font-medium flex items-center gap-2">📎 Download: ${f.name}</a>`;
+                                hasFiles = true;
+                            }
+                        });
+                        filesHtml += `</div>`;
+                        imagesHtml += `</div>`;
+                        if (!hasFiles) filesHtml = '';
+                        if (!hasImages) imagesHtml = '';
+                    }
+
+                    singlePostContent.innerHTML = `
+                        <div class="flex items-center gap-3 mb-5">
+                            <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold border border-blue-100 text-lg">${authorInitial}</div>
+                            <div>
+                                <h4 class="font-bold text-base text-gray-900">${authorName}</h4>
+                                <p class="text-sm text-gray-500 font-medium">${dateStr} <span class="mx-1">•</span> <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">${post.category}</span></p>
+                            </div>
+                        </div>
+                        <h2 class="text-3xl font-extrabold mb-4 text-gray-900 leading-tight">
+                            <span class="text-blue-600 mr-2">#${post.slNo || '-'}</span>${post.title}
+                        </h2>
+                        <p class="text-gray-700 text-base leading-relaxed whitespace-pre-wrap">${post.content}</p>
+                        ${imagesHtml}
+                        ${filesHtml}
+                        ${post.isClosed ? `<div class="mt-4 inline-block bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm font-bold border border-red-200">🔒 This discussion has been closed by an Administrator. No further comments can be added.</div>` : ''}
+                    `;
+                    
+                    if (post.isClosed) {
+                        addCommentForm.classList.add('hidden');
+                    } else {
+                        addCommentForm.classList.remove('hidden');
+                    }
+                    loadComments(id);
+                } else {
+                    singlePostContent.innerHTML = '<div class="text-center text-red-500 py-10">Post not found.</div>';
+                }
+            } catch (error) {
+                console.error("Error fetching post:", error);
+                singlePostContent.innerHTML = '<div class="text-center text-red-500 py-10">Error loading post.</div>';
+            }
+        }
+
+        function loadComments(postId) {
+            if (commentsUnsubscribe) commentsUnsubscribe();
+            
+            // Removed orderBy('createdAt', 'asc') to prevent Firestore Missing Index errors.
+            // We fetch the comments for this post and sort them in JavaScript instead.
+            const q = query(collection(db, 'forum_comments'), where('postId', '==', postId));
+            
+            commentsUnsubscribe = onSnapshot(q, (snapshot) => {
+                commentsContainer.innerHTML = '';
+                if (snapshot.empty) {
+                    commentsContainer.innerHTML = '<div class="text-center text-gray-500 py-4">No comments yet. Be the first to comment!</div>';
+                    return;
+                }
+                
+                // Gather all comments into an array
+                const comments = [];
+                snapshot.forEach((docSnap) => {
+                    comments.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                
+                // Sort comments ascending (oldest first)
+                comments.sort((a, b) => {
+                    const timeA = a.createdAt ? a.createdAt.toMillis() : Date.now();
+                    const timeB = b.createdAt ? b.createdAt.toMillis() : Date.now();
+                    return timeA - timeB;
+                });
+
+                comments.forEach((comment) => {
+                    const dateStr = comment.createdAt ? new Date(comment.createdAt.toMillis()).toLocaleString() : 'Just now';
+                    const authorName = comment.userName || 'Unknown';
+                    const isCommentOwner = currentUser && currentUser.uid === comment.userId;
+                    const likes = comment.likes || [];
+                    const dislikes = comment.dislikes || [];
+                    const hasLiked = currentUser && likes.includes(currentUser.uid);
+                    const hasDisliked = currentUser && dislikes.includes(currentUser.uid);
+                    const likedBy = comment.likedBy || {};
+                    const dislikedBy = comment.dislikedBy || {};
+                    const likedNames = Object.values(likedBy).join(', ');
+                    const dislikedNames = Object.values(dislikedBy).join(', ');
+                    
+                    let filesHtml = '';
+                    let imagesHtml = '';
+                    if (comment.fileUrls && comment.fileUrls.length > 0) {
+                        let hasFiles = false;
+                        let hasImages = false;
+                        filesHtml = `<div class="mt-3 flex flex-wrap gap-2">`;
+                        imagesHtml = `<div class="mt-3 grid grid-cols-2 max-w-sm gap-2">`;
+                        
+                        comment.fileUrls.forEach(f => {
+                            const ext = f.name.split('.').pop().toLowerCase();
+                            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                                imagesHtml += `<img src="${f.url}" alt="${f.name}" class="rounded-lg object-cover w-full h-32 border border-gray-200 shadow-sm cursor-pointer hover:opacity-90 transition-opacity" onclick="window.open('${f.url}', '_blank')" />`;
+                                hasImages = true;
+                            } else {
+                                filesHtml += `<a href="${f.url}" target="_blank" class="text-xs text-blue-600 font-medium hover:underline bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-full hover:bg-blue-50 hover:border-blue-200 transition-colors flex items-center gap-1">📎 ${f.name}</a>`;
+                                hasFiles = true;
+                            }
+                        });
+                        filesHtml += `</div>`;
+                        imagesHtml += `</div>`;
+                        if (!hasFiles) filesHtml = '';
+                        if (!hasImages) imagesHtml = '';
+                    }
+
+                    commentsContainer.innerHTML += `
+                        <div class="bg-white p-4 sm:p-5 rounded-xl border border-gray-200 shadow-sm mb-3">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-full bg-gray-100 text-gray-600 border border-gray-200 flex items-center justify-center font-bold text-xs">${authorName.charAt(0).toUpperCase()}</div>
+                                    <div>
+                                        <span class="font-bold text-gray-900 text-sm">${authorName}</span>
+                                        <span class="text-xs text-gray-400 font-medium ml-2">${dateStr}</span>
+                                    </div>
+                                </div>
+                                ${isCommentOwner ? `<button data-id="${comment.id}" class="delete-comment-btn text-gray-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-md transition-colors" title="Delete Comment"><svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : ''}
+                            </div>
+                            <p class="text-gray-700 text-[15px] whitespace-pre-wrap ml-10">${comment.text}</p>
+                            <div class="ml-10">${imagesHtml}</div>
+                            <div class="ml-10">${filesHtml}</div>
+                            <div class="flex items-center gap-4 mt-3 pt-3 border-t border-gray-50 ml-10">
+                                <button data-id="${comment.id}" title="${likedNames}" data-action="like" data-active="${hasLiked}" class="comment-reaction-btn flex items-center gap-1.5 text-xs font-medium transition-colors ${hasLiked ? 'text-green-700 font-bold' : 'text-green-500 hover:text-green-600'}">
+                                    <svg class="w-4 h-4 pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.56l2.5-8.76A2 2 0 0 0 21 11H14z" /><path d="M2 9h4v12H2z" /></svg>
+                                    ${likes.length}
+                                </button>
+                                <button data-id="${comment.id}" title="${dislikedNames}" data-action="dislike" data-active="${hasDisliked}" class="comment-reaction-btn flex items-center gap-1.5 text-xs font-medium transition-colors ${hasDisliked ? 'text-red-700 font-bold' : 'text-red-500 hover:text-red-600'}">
+                                    <svg class="w-4 h-4 pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.56l-2.5 8.76A2 2 0 0 0 3 13h7z" /><path d="M22 15h-4V3h4z" /></svg>
+                                    ${dislikes.length}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Attach event listeners to dynamic delete buttons
+                document.querySelectorAll('.delete-comment-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        if (confirm('Are you sure you want to delete this comment?')) {
+                            const id = e.target.getAttribute('data-id');
+                            try {
+                                await deleteDoc(doc(db, 'forum_comments', id));
+                            } catch (err) {
+                                console.error('Error deleting comment:', err);
+                                alert('Failed to delete comment.');
+                            }
+                        }
+                    });
+                });
+
+                // Attach event listeners to dynamic reaction buttons
+                document.querySelectorAll('.comment-reaction-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        if (!currentUser) {
+                            alert('Please sign in to react to comments.');
+                            return;
+                        }
+                        const id = e.currentTarget.getAttribute('data-id');
+                        const action = e.currentTarget.getAttribute('data-action');
+                        
+                        const parent = e.currentTarget.parentElement;
+                        const btnLike = parent.querySelector('[data-action="like"]');
+                        const btnDislike = parent.querySelector('[data-action="dislike"]');
+                        const hasLiked = btnLike.getAttribute('data-active') === 'true';
+                        const hasDisliked = btnDislike.getAttribute('data-active') === 'true';
+                        
+                        if (hasLiked || hasDisliked) {
+                            alert("You can only react once per comment.");
+                            return;
+                        }
+                        
+                        const commentRef = doc(db, 'forum_comments', id);
+                        const currentUserName = currentUser.displayName || currentUser.email.split('@')[0];
+
+                        try {
+                            // Check if post is closed before allowing reaction
+                            const pDoc = await getDoc(doc(db, 'forum_posts', currentPostId));
+                            if (pDoc.exists() && pDoc.data().isClosed) {
+                                alert("This discussion is closed. Reactions are disabled.");
+                                return;
+                            }
+
+                            if (action === 'like') {
+                                await updateDoc(commentRef, { 
+                                    likes: arrayUnion(currentUser.uid), 
+                                    [`likedBy.${currentUser.uid}`]: currentUserName
+                                });
+                            } else if (action === 'dislike') {
+                                await updateDoc(commentRef, { 
+                                    dislikes: arrayUnion(currentUser.uid), 
+                                    [`dislikedBy.${currentUser.uid}`]: currentUserName
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Reaction error:', error);
+                            if (error.code === 'permission-denied') alert('Failed to react. Please check your Firestore Security Rules.');
+                        }
+                    });
+                });
+            }, (error) => {
+                console.error("Error fetching comments:", error);
+                commentsContainer.innerHTML = '<div class="text-center text-red-500 py-4">Error loading comments. Check console for details.</div>';
+            });
+        }
+
+        commentCameraInput.addEventListener('change', () => {
+            if (commentCameraInput.files.length > 0) {
+                commentCameraName.textContent = `📷 Snapshot attached: ${commentCameraInput.files[0].name}`;
+                commentCameraName.classList.remove('hidden');
+            } else {
+                commentCameraName.classList.add('hidden');
+            }
+        });
+
+        addCommentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentPostId) return;
+            
+            commentUploadProgress.classList.remove('hidden');
+            const submitBtn = document.getElementById('submit-comment-btn');
+            submitBtn.disabled = true;
+            
+            const text = document.getElementById('comment-text').value;
+            const files1 = document.getElementById('comment-files').files;
+            const files2 = document.getElementById('comment-camera').files;
+            const allFiles = [...files1, ...files2];
+            
+            try {
+                const uploadedFiles = await handleFileUploads(allFiles);
+                await addDoc(collection(db, 'forum_comments'), {
+                    postId: currentPostId,
+                    text: text,
+                    userId: currentUser.uid,
+                    userName: currentUser.displayName || currentUser.email.split('@')[0],
+                    createdAt: serverTimestamp(),
+                    fileUrls: uploadedFiles,
+                    likes: [],
+                    dislikes: [],
+                    likedBy: {},
+                    dislikedBy: {}
+                });
+                addCommentForm.reset();
+                commentCameraName.classList.add('hidden');
+                
+                commentSuccessMsg.classList.remove('hidden');
+                setTimeout(() => {
+                    commentSuccessMsg.classList.add('hidden');
+                }, 3000);
+            } catch (err) {
+                console.error("Error adding comment:", err);
+                alert("Failed to add comment.");
+            }
+            commentUploadProgress.classList.add('hidden');
+            submitBtn.disabled = false;
+        });
+
+        function loadProfile() {
+            if (!currentUser) return;
+            
+            const displayName = currentUser.displayName || currentUser.email.split('@')[0];
+            document.getElementById('profile-email-display').innerText = displayName;
+            document.getElementById('profile-avatar').innerText = displayName.charAt(0).toUpperCase();
+            profilePostsContainer.innerHTML = '<div class="text-center py-4 text-gray-500">Loading your posts...</div>';
+
+            const q = query(collection(db, 'forum_posts'), where('userId', '==', currentUser.uid), orderBy('createdAt', 'desc'));
+            onSnapshot(q, (snapshot) => {
+                profilePostsContainer.innerHTML = '';
+                if (snapshot.empty) {
+                    profilePostsContainer.innerHTML = '<div class="text-center py-10 text-gray-500">You haven\'t created any posts yet.</div>';
+                    return;
+                }
+                
+                snapshot.forEach((docSnap) => {
+                    const post = docSnap.data();
+                    const dateStr = post.createdAt ? new Date(post.createdAt.toMillis()).toLocaleDateString() : 'Just now';
+                    const postCard = document.createElement('div');
+                    postCard.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-200";
+                    postCard.innerHTML = `
+                        <h2 class="text-lg font-bold mb-2"><span class="text-blue-600 mr-1">#${post.slNo || '-'}</span>${post.title}</h2>
+                            <p class="text-gray-700 text-sm mb-2 line-clamp-2">${post.content}</p>
+                        <p class="text-xs text-gray-500">${dateStr} • <span class="bg-gray-100 px-2 rounded-full">${post.category}</span></p>
+                    `;
+                    profilePostsContainer.appendChild(postCard);
+                });
+            });
+        }
+    </script>
+</body>
+</html>

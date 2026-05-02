@@ -107,13 +107,13 @@
                 document.getElementById('user-display').innerText = user.displayName || user.email;
                 loadAdminData();
             } else {
-                window.location.href = 'index.html';
+                window.location.href = 'signin.html';
             }
         });
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
             await signOut(auth);
-            window.location.href = 'index.html';
+            window.location.href = 'signin.html';
         });
 
         async function loadAdminData() {

@@ -11,29 +11,32 @@
 <body class="bg-[#F1F2F2] text-[#282829]">
 
     <!-- Navbar -->
-    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 px-4 py-3 flex items-center justify-center shadow-sm">
-        <div class="max-w-7xl w-full flex items-center justify-between">
-            <div class="flex items-center">
-                <a href="index.html" class="text-2xl font-bold text-blue-700 font-serif tracking-tight hover:opacity-80 transition-opacity">USSC Finance</a>
+    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 px-2 sm:px-4 py-3 flex items-center justify-center shadow-sm">
+        <div class="max-w-7xl w-full flex items-center justify-between gap-2">
+            <div class="flex items-center overflow-hidden pr-2">
+                <a href="index.html" class="text-xl sm:text-2xl font-bold text-blue-700 font-serif tracking-tight hover:opacity-80 transition-opacity truncate">USSC Finance</a>
             </div>
-            <div class="flex items-center gap-1 sm:gap-2">
-                <a href="index.html" class="flex items-center gap-1.5 px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded transition-colors font-medium text-sm" title="Home">
+            <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                <a href="index.html" class="flex items-center gap-1.5 p-2 sm:px-3 sm:py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded transition-colors font-medium text-sm" title="Home">
                     <svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9v12h5v-7h6v7h5V9z"/></svg>
-                    <span class="hidden sm:inline">Home</span>
+                    <span class="max-sm:hidden">Home</span>
                 </a>
-                <a href="post.html" class="flex items-center gap-1.5 px-3 py-2 text-blue-700 bg-blue-50 rounded transition-colors font-medium text-sm" title="Make Post">
+                <a href="post.html" class="flex items-center gap-1.5 p-2 sm:px-3 sm:py-2 text-blue-700 bg-blue-50 rounded transition-colors font-medium text-sm" title="Make Post">
                     <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    <span class="hidden sm:inline">Make Post</span>
+                    <span class="max-sm:hidden">Make Post</span>
                 </a>
-                <a href="index.html" class="flex items-center gap-2 px-3 py-1.5 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded-full transition-colors font-medium text-sm border border-transparent hover:border-gray-200" title="Profile">
+                <a href="index.html" class="flex items-center gap-2 p-2 sm:px-3 sm:py-1.5 text-gray-600 hover:bg-gray-100 hover:text-blue-700 rounded-full transition-colors font-medium text-sm border border-transparent hover:border-gray-200" title="Profile">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                    <span id="user-display" class="hidden sm:inline max-w-[120px] truncate"></span>
+                    <span id="user-display" class="max-sm:hidden max-w-[100px] lg:max-w-[150px] truncate"></span>
                 </a>
-                <a href="admin.html" id="nav-admin" class="hidden flex items-center gap-2 px-3 py-1.5 text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-full transition-colors font-medium text-sm border border-transparent" title="Admin">
+                <a href="admin.html" id="nav-admin" class="hidden flex items-center gap-2 p-2 sm:px-3 sm:py-1.5 text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-full transition-colors font-medium text-sm border border-transparent" title="Admin">
                     <svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-                    <span class="hidden sm:inline">Admin</span>
+                    <span class="max-sm:hidden">Admin</span>
                 </a>
-                <button id="logout-btn" class="text-sm px-4 py-1.5 border border-gray-300 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-800 font-medium transition-colors">Logout</button>
+                <button id="logout-btn" class="text-sm p-2 sm:px-4 sm:py-1.5 border border-transparent sm:border-gray-300 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-800 font-medium transition-colors" title="Logout">
+                    <svg class="w-5 h-5 sm:hidden pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    <span class="max-sm:hidden">Logout</span>
+                </button>
             </div>
         </div>
     </nav>
@@ -84,9 +87,9 @@
                     <p class="text-xs text-gray-500 mt-1">Supported: PDF, JPG, PNG, DOC, DOCX</p>
                 </div>
                 <div id="upload-progress" class="hidden text-sm text-blue-600 font-medium">Uploading files... please wait.</div>
-                <div class="flex gap-3 pt-2">
-                    <a href="index.html" class="px-6 py-2.5 border border-[#dee0e1] text-gray-700 rounded font-medium hover:bg-gray-50 text-center">Cancel</a>
-                    <button type="submit" id="submit-post-btn" class="px-6 py-2.5 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 flex-1">Post to Forum</button>
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                    <a href="index.html" class="w-full sm:w-auto px-6 py-2.5 border border-[#dee0e1] text-gray-700 rounded font-medium hover:bg-gray-50 text-center order-2 sm:order-1">Cancel</a>
+                    <button type="submit" id="submit-post-btn" class="w-full sm:flex-1 px-6 py-2.5 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 order-1 sm:order-2">Post to Forum</button>
                 </div>
             </form>
             <div id="post-success-msg" class="hidden mt-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center gap-3 font-medium shadow-sm">

@@ -220,7 +220,7 @@
         // --- AUTHENTICATION LOGIC ---
         onAuthStateChanged(auth, async (user) => {
             loadingScreen.classList.add('hidden');
-            if (user) {
+            if (user && user.email) {
                 // Check or Create User Doc for Admin panel indexing
                 const userDocRef = doc(db, 'forum_users', user.uid);
                 const userDocSnap = await getDoc(userDocRef);
